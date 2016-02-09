@@ -45,30 +45,28 @@ public class Solver {
 			Entry problem = new Entry(succesor, succesor.getCurrentCost());
 			//recursive minmax solution search for successor
 			Entry solution = solveMinMax(problem, lb, ub, depth-1, isMax ? false : true);
+			boolean optimalFound = false;
 			
 			if(optimal == null){//first pass, init optimal
 				optimal = new Entry(succesor, solution.getPathCost());
-				if(isMax){
-					if(optimal.getPathCost() > ub)//check for prune opportunity
-						return optimal;
-					lb = optimal.getPathCost();//reset lower prune bound
-				}else{
-					if(optimal.getPathCost() < lb)//check for prune opportunity
-						return optimal;
-					ub = optimal.getPathCost();//reset upper prune bound
-				}
-			}else if(isMax && solution.getPathCost() > optimal.getPathCost()){//max 
+				optimalFound = true;
+			}else if(isMax && solution.getPathCost() > optimal.getPathCost()){
 				optimal = new Entry(succesor, solution.getPathCost());
+				optimalFound = true;
+			}else if(!isMax && solution.getPathCost() < optimal.getPathCost()){
+				optimal = new Entry(succesor, solution.getPathCost() );
+				optimalFound = true;
+			}
+			
+			if(isMax && optimalFound){
 				if(optimal.getPathCost() > ub)//check for prune opportunity
 					return optimal;
 				lb = optimal.getPathCost();//reset lower prune bound
-			}else if(!isMax && solution.getPathCost() < optimal.getPathCost()){
-				optimal = new Entry(succesor, solution.getPathCost() );
+			}else if(!isMax && optimalFound){
 				if(optimal.getPathCost() < lb)//check for prune opportunity
 					return optimal;
 				ub = optimal.getPathCost();//reset upper prune bound
-		
-			}	
+			}
 		}
 		return optimal;
 	}	
