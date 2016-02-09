@@ -13,47 +13,91 @@ import java.util.PriorityQueue;
  */
 
 public class Solver {
-	IState start;
-	IState solution;
-	Runtime runtime = Runtime.getRuntime();
-	int time = 0;
-	long mem = 0;
 	
-	public Solver(IState problem, IState solution){
-		if(problem == null)
-			throw new IllegalArgumentException("Error: begining state cannot be null");
-		if(solution == null)
-			throw new IllegalArgumentException("Error: solution state cannot be null");
-		if(!problem.isSameType(solution))
-			throw new IllegalArgumentException("Error: begining and solution state must be same type");
-		
-		this.start = problem;
-		this.solution = solution;
+	
+	//solveMinMax
+	// recursive entry for solution search
+	// based on minmax algorithm
+	public static Solution solveMinMax(IState start, int depth){
+		Entry problem = new Entry(start, start.getCurrentCost());
+		Entry solution = solveMinMax(problem, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, true);
+		return new Solution("MinMax Search", "na", "na", solution.getIState());
 	}
+	
+	//solveMinMax
+	// solution search
+	// based on minmax algorithm
+	private static Entry solveMinMax(Entry start, int lb, int ub, int depth, boolean isMax){
+		
+		//return if max search depth reached
+		if(depth == 0)
+			return start;
+		
+		//get successors and return if non-exist
+		ArrayList<IState> successors = start.state.getSuccessors();
+		if(successors.size() == 0)
+			return start;
+		
+		Entry optimal = null;
+		
+		//get optimal successor solution for alternating min/max
+		for(IState succesor : successors){
+			Entry problem = new Entry(succesor, succesor.getCurrentCost());
+			//recursive minmax solution search for successor
+			Entry solution = solveMinMax(problem, lb, ub, depth-1, isMax ? false : true);
+			
+			if(optimal == null){//first pass, init optimal
+				optimal = new Entry(succesor, solution.getPathCost());
+				if(isMax){
+					if(optimal.getPathCost() > ub)//check for prune opportunity
+						return optimal;
+					lb = optimal.getPathCost();//reset lower prune bound
+				}else{
+					if(optimal.getPathCost() < lb)//check for prune opportunity
+						return optimal;
+					ub = optimal.getPathCost();//reset upper prune bound
+				}
+			}else if(isMax && solution.getPathCost() > optimal.getPathCost()){//max 
+				optimal = new Entry(succesor, solution.getPathCost());
+				if(optimal.getPathCost() > ub)//check for prune opportunity
+					return optimal;
+				lb = optimal.getPathCost();//reset lower prune bound
+			}else if(!isMax && solution.getPathCost() < optimal.getPathCost()){
+				optimal = new Entry(succesor, solution.getPathCost() );
+				if(optimal.getPathCost() < lb)//check for prune opportunity
+					return optimal;
+				ub = optimal.getPathCost();//reset upper prune bound
+		
+			}	
+		}
+		return optimal;
+	}	
 	
 	//solveBFS
 	// solution search based on breadth
 	// first search algorithm
-	public Solution solveBFS(){
-		resetTime();
-		resetMem();
+	public static Solution solveBFS(IState problem, IState solution){
+		Measure m = new Measure();
+		m.resetTime();
+		m.resetMem();
+		
 		
 		//init search data structure and add start state
 		Solution foundSolution = null;
 		ArrayList<IState> toVisit = new ArrayList<IState>();
 		HashSet<IState> isVisited = new HashSet<IState>();
-		toVisit.add(start);
+		toVisit.add(problem);
 		
 		//search until there are no more successor states
 		//to visit
 		while(!toVisit.isEmpty()){
-			updateTime();
-			updateMem(); 
+			m.updateTime();
+			m.updateMem();  
 			
 			//get next state (FIFO), and check if solution
 			IState current = toVisit.remove(0);
 			if(current.equals(solution))
-				 return foundSolution = new Solution("Breadth First Search", time + " ms", mem + " mb", current);
+				 return foundSolution = new Solution("Breadth First Search",  m.getTime() + " ms", m.getMem() + " mb", current);
 	
 			//get successor states and queue
 			for(IState succesor : current.getSuccessors()){
@@ -74,27 +118,29 @@ public class Solver {
 	//solveDFS
 	// solution search based on depth
 	// first search algorithm
-	public Solution solveDFS(){
-		resetTime();
-		resetMem();
+	public static Solution solveDFS(IState problem, IState solution){
+		Measure m = new Measure();
+		m.resetTime();
+		m.resetMem();
+		
 		
 		//init search data structure and add start state
 		Solution foundSolution = null;
 		ArrayList<IState> toVisit = new ArrayList<IState>();
 		HashSet<IState> isVisited = new HashSet<IState>();
-		toVisit.add(start);
+		toVisit.add(problem);
 		
 		//search until there are no more successor states
 		//to visit
 		while(!toVisit.isEmpty()){
-			updateTime();
-			updateMem(); 
+			m.updateTime();
+			m.updateMem();  
 			
 			//get next state (LIFO), and check if solution
 			IState current = toVisit.remove(toVisit.size()-1);
 			
 			if(current.equals(solution))
-				 return foundSolution = new Solution("Depth First Search", time + " ms", mem + " mb", current);
+				 return foundSolution = new Solution("Depth First Search",  m.getTime() + " ms", m.getMem() + " mb", current);
 			
 			//get successor states and queue
 			for(IState succesor : current.getSuccessors()){
@@ -114,9 +160,11 @@ public class Solver {
 	//solveID
 	// solution search based on iterative
 	// deepening search algorithm
-	public Solution solveID(){
-		resetTime();
-		resetMem();
+	public static Solution solveID(IState problem, IState solution){
+		Measure m = new Measure();
+		m.resetTime();
+		m.resetMem();
+		
 		
 		Solution foundSolution = null;
 		
@@ -130,17 +178,17 @@ public class Solver {
 			//init search data structures and add start state
 			ArrayList<IState> toVisit = new ArrayList<IState>();
 			HashSet<IState> isVisited = new HashSet<IState>();
-			toVisit.add(start);
+			toVisit.add(problem);
 			
 			//search until no more successor states at depth i
 			while(!toVisit.isEmpty()){
-				updateTime();
-				updateMem(); 
+				m.updateTime();
+				m.updateMem(); 
 				
 				//get next state (LIFO), and check if solution
 				IState current = toVisit.remove(toVisit.size()-1);
 				if(current.equals(solution))
-					 return foundSolution = new Solution("Iterative Deepening",  time + " ms", mem + " mb", current);
+					 return foundSolution = new Solution("Iterative Deepening", m.getTime() + " ms", m.getMem() + " mb", current);
 				
 				//do not add successors if current states hits depth limit
 				if(current.getDepth() >= i)
@@ -161,14 +209,16 @@ public class Solver {
 		}
 		
 		return foundSolution;
-	}
+	}	
 	
 	//solveID
 	// solution search based on uniform
 	// cost algorithm
-	public Solution solveUC(){
-		resetTime();
-		resetMem();
+	public static Solution solveUC(IState problem, IState solution){
+		Measure m = new Measure();
+		m.resetTime();
+		m.resetMem();
+		
 		
 		//init search data structure and add start state
 		Solution foundSolution = null;
@@ -176,19 +226,19 @@ public class Solver {
 		//pq based on generic UC comparator
 		PriorityQueue<IState> toVisit = new PriorityQueue<IState>(1, comparatorUC());
 		HashSet<IState> isVisited = new HashSet<IState>();
-		toVisit.add(start);
+		toVisit.add(problem);
 		
 		//search until there are no more successor states
 		//to visit
 		while(!toVisit.isEmpty()){
-			updateTime();
-			updateMem(); 
+			m.updateTime();
+			m.updateMem();  
 			
 			//get next state (cost adjusted PQ), and check if solution
 			IState current = toVisit.poll();
 			
 			if(current.equals(solution))
-				 return foundSolution = new Solution("Uniform Cost",  time + " ms", mem + " mb", current);
+				 return foundSolution = new Solution("Uniform Cost", m.getTime() + " ms", m.getMem() + " mb", current);
 			
 			//get successor states and queue
 			for(IState succesor : current.getSuccessors()){
@@ -224,28 +274,29 @@ public class Solver {
 	//solveAS
 	// solution search based on A
 	// star algorithm
-	public Solution solveAS(){
-		resetTime();
-		resetMem();
+	public static Solution solveAS(IState problem, IState solution){
+		Measure m = new Measure();
+		m.resetTime();
+		m.resetMem();
 		
 		//init search data structure and add start state
 		Solution foundSolution = null;
 		HashMap<IState, Integer> costs = new HashMap<IState, Integer>();
 		PriorityQueue<IState> toVisit = new PriorityQueue<IState>(1, comparatorAS());
 		HashSet<IState> isVisited = new HashSet<IState>();
-		toVisit.add(start);
+		toVisit.add(problem);
 		
 		//search until there are no more successor states
 		//to visit
 		while(!toVisit.isEmpty()){
-			updateTime();
-			updateMem(); 
+			m.updateTime();
+			m.updateMem(); 
 			
 			//get next state (cost adjusted PQ), and check if solution
 			IState current = toVisit.poll();
 			
 			if(current.equals(solution))
-				 return foundSolution = new Solution("A*",  time + " ms", mem + " mb", current);
+				 return foundSolution = new Solution("A*",  m.getTime() + " ms", m.getMem() + " mb", current);
 			
 			//get successor states and queue
 			for(IState succesor : current.getSuccessors()){
@@ -316,29 +367,5 @@ public class Solver {
 		};
 	}
 	
-	//resetTime
-	// reset time field
-	private void resetTime(){
-		time = 0;
-	}
-	
-	//resetMem
-	// reset mem field
-	private void resetMem(){
-		mem = 0;
-		runtime.freeMemory();
-	}
-	
-	//updateTime
-	// increment time field
-	private void updateTime(){
-		time++;
-	}
-	
-	//updateMem
-	// update mem field for new max
-	private void updateMem(){
-		int scale = 1048576;
-		mem = Math.max(mem, (runtime.totalMemory() - runtime.freeMemory())/scale);
-	}
+
 }

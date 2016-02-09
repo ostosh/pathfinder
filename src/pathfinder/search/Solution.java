@@ -21,6 +21,14 @@ public class Solution {
 		this.space = space;	
 	}
 	
+	
+	//getEndState
+	// get the end field
+	public IState getEndState(){
+		return end;
+	}
+	
+	
 	//getOrderedPath
 	// reserve solution into an ordered
 	// path array from problem start to finish
