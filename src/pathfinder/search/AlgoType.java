@@ -1,4 +1,4 @@
-package pathfinder.puzzle;
+package pathfinder.search;
 
 
 /*
