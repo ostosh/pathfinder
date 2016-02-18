@@ -16,7 +16,6 @@ public class GameState implements IState{
 		static final byte E = 0;
 		static final byte O = 1;
 		static final byte X = 2;
-
 	}
 	
 	GameState parent;
@@ -33,7 +32,6 @@ public class GameState implements IState{
 		Arrays.fill(board, CellState.E);
 		this.board = Arrays.copyOf(board, board.length);
 		this.score = 0;
-		
 	}
 	
 	//private constructor to be called when a state is copying
@@ -157,7 +155,6 @@ public class GameState implements IState{
 		
 		byte nextMove = this.move == CellState.O ? CellState.X : CellState.O;
 		return new GameState(tmp, nextMove, newScore);
-
 	}
 	
 	//hasNext
@@ -169,7 +166,6 @@ public class GameState implements IState{
 				return true;
 		}
 		return false;
-		
 	}
 	
 	//hasNext
@@ -194,7 +190,6 @@ public class GameState implements IState{
 				return j;
 			}
 		}
-		
 		return -1;
 		
 	}

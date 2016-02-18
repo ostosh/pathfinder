@@ -6,5 +6,5 @@ package pathfinder.puzzle;
  * 
  */
 public enum HeuristicType {
-	A1, A2 ,A3,NA
+	A1, A2 ,A3, NA
 }

@@ -11,8 +11,7 @@ package pathfinder.search;
 	int pathCost;
 	Entry(IState state, int pathCost){
 		this.state = state;
-		this.pathCost = pathCost;
-		
+		this.pathCost = pathCost;	
 	}
 	
 	//getPathCost

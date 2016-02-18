@@ -25,8 +25,7 @@ public class Controller {
 		this.plys = plys;
 		byte[] board = new byte[width*width];
 		gameState = new GameState(board);		
-	}
-	
+	}	
 	
 	//getUserMove
 	// parse valid user move
