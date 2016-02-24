@@ -25,8 +25,10 @@ public class Solver {
 	}
 	
 	//solveMinMax
-	// solution search
-	// based on minmax algorithm
+	// solution search based
+	// on minmax algorithm
+	// optimized with alpha-
+	// beta pruning
 	private static Entry solveMinMax(Entry start, int lb, int ub, int depth, boolean isMax){
 		
 		//return if max search depth reached
