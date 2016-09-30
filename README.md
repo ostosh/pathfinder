@@ -1,6 +1,6 @@
 # pathfinder
 
-this repo contains abstract search implementation of:
+sample repository of abstract search:
 
 - min max with alpha beta pruning 
 - depth first search
@@ -9,7 +9,7 @@ this repo contains abstract search implementation of:
 - uniform cost
 - a star
 
-concrete implementation examples:
+implementation examples:
 
 - 8 puzzle board
 - go / connect 4 NxN mash up game
